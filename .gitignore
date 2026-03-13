@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+.eggs/
+
+# Environment variables — NEVER commit these
+.env
+.env.local
+.env.production
+
+# Next.js
+frontend/.next/
+frontend/node_modules/
+frontend/out/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Model cache — large binary files, no need to track
+*.bin
+*.safetensors
+sentence_transformers/

@@ -1,0 +1,13 @@
+# Docker is for local testing only. Primary dev runs in Colab.
+services:
+  backend:
+    build: ./backend
+    container_name: pkb-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./backend/.env
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped

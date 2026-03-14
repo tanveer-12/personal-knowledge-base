@@ -1,102 +1,84 @@
 -- ==========================================================
 -- Personal Knowledge Base with Semantic Search
--- Database intialization script
+-- Database initialization script
 --
 -- This script prepares PostgreSQL for semantic vector search.
--- 
+--
 -- It will:
 -- 1. Enable the pgvector extension
--- 2. Create the notes table
+-- 2. Drop and recreate the notes table with correct schema
 -- 3. Create a vector similarity index (HNSW)
 -- 4. Create a timestamp update trigger
 --
 -- NOTE:
--- This file can be run manually in the Neon SQL editor,
--- but it is also compatible with SQLAlchemy migrations.
--- FastAPI's Base.metadata.create_all() may create tables
--- automatically on first startup if they do not exist.
+-- Run this in Neon SQL editor OR via Cell 3 in the Colab
+-- notebook. FastAPI startup also calls create_all() but
+-- that will NOT alter an existing table — so this script
+-- uses DROP + CREATE to guarantee a clean correct schema.
 -- ==========================================================
 
 
 -- ----------------------------------------------------------
 -- Enable the pgvector extension
 -- ----------------------------------------------------------
--- pgvector adds a new column type "vector"
--- that stores embedding arrays and allows similarity search
--- such as cosine distance or L2 distance.
-
 CREATE EXTENSION IF NOT EXISTS vector;
 
--- ----------------------------------------------------------
--- Notes Table
--- ----------------------------------------------------------
--- This table stores user notes and their corresponding
--- embedding vectors for semantic search.
 
-CREATE TABLE IF NOT EXISTS notes (
-    id SERIAL PRIMARY KEY,
-    title TEXT,
-    content TEXT NOT NULL,
-    -- embedding vector produced by SentenceTransformers
-    -- all-MiniLM-L6-v2 produces 384 dimensional embeddings
-    embedding vector(384),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+-- ----------------------------------------------------------
+-- Notes table — drop first to guarantee correct schema
+-- ----------------------------------------------------------
+-- We drop and recreate instead of using CREATE TABLE IF NOT
+-- EXISTS because IF NOT EXISTS will silently keep a stale
+-- table that is missing columns. During development this
+-- causes confusing 500 errors. Drop + recreate is safe
+-- because Neon is not production data.
+
+DROP TABLE IF EXISTS notes CASCADE;
+
+CREATE TABLE notes (
+    id          SERIAL PRIMARY KEY,
+    title       VARCHAR(255) NOT NULL,
+    -- body matches the SQLAlchemy model field name exactly
+    body        TEXT NOT NULL,
+    -- tags stored as comma-separated string e.g. "python,learning"
+    tags        VARCHAR(500),
+    -- 384 dimensions matches all-MiniLM-L6-v2 output
+    embedding   vector(384),
+    created_at  TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- ----------------------------------------------------------
--- HNSW Vector Index
--- ----------------------------------------------------------
--- This index accelerates nearest-neighbour vector search.
---
--- HNSW = Hierarchical Navigable Small World Graph
--- It allows approximate nearest neighbor search in high
--- dimensional vector spaces.
---
--- Parameters:
--- m = 16
--- Each node connects to 16 neighbours in the graph.
---
--- ef_construction = 64
--- Search depth during index construction.
---
--- These values are pgvector defaults and are well suited
--- for datasets under ~1 million vectors.
 
-CREATE INDEX IF NOT EXISTS notes_embedding_hsnw_idx 
+-- ----------------------------------------------------------
+-- HNSW vector index
+-- ----------------------------------------------------------
+-- Accelerates cosine similarity search.
+-- m=16 and ef_construction=64 are pgvector defaults,
+-- well suited for datasets under 1 million vectors.
+
+CREATE INDEX notes_embedding_hnsw_idx
 ON notes
 USING hnsw (embedding vector_cosine_ops)
-WITH(
-    m = 16,
-    ef_construction = 64
-);
+WITH (m = 16, ef_construction = 64);
+
 
 -- ----------------------------------------------------------
--- Index for ordering notes
+-- Index for chronological ordering
 -- ----------------------------------------------------------
--- This allows efficient sorting when retrieving notes
--- in reverse chronological order.
-
-CREATE INDEX IF NOT EXISTS notes_created_at_idx
+CREATE INDEX notes_created_at_idx
 ON notes (created_at DESC);
 
--- ----------------------------------------------------------
--- Trigger Function to Auto Update updated_at
--- ----------------------------------------------------------
--- Every time a row is modified, we automatically
--- update the updated_at timestamp.
 
+-- ----------------------------------------------------------
+-- Auto-update trigger for updated_at
+-- ----------------------------------------------------------
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
-   NEW.updated_at = CURRENT_TIMESTAMP;
-   RETURN NEW;
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
--- ----------------------------------------------------------
--- Trigger Binding
--- ----------------------------------------------------------
 
 DROP TRIGGER IF EXISTS set_timestamp ON notes;
 
@@ -104,3 +86,36 @@ CREATE TRIGGER set_timestamp
 BEFORE UPDATE ON notes
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
+```
+
+---
+
+## What changed and why
+
+| What | Before | After | Why |
+|---|---|---|---|
+| `content` column | `content TEXT NOT NULL` | `body TEXT NOT NULL` | Must match SQLAlchemy model exactly |
+| `tags` column | missing | `tags VARCHAR(500)` | Router tries to insert it, missing column = 500 error |
+| `title` type | `TEXT` | `VARCHAR(255) NOT NULL` | Matches model, enforces not null |
+| `CREATE TABLE IF NOT EXISTS` | present | replaced with `DROP + CREATE` | IF NOT EXISTS silently keeps wrong schema |
+| `created_at` type | `TIMESTAMP WITH TIME ZONE` | `TIMESTAMPTZ` | Shorter alias, same thing |
+
+---
+
+## What to do now
+
+**Step 1** — Replace the contents of `database/init.sql` in VS Code with the file above. Save it.
+
+**Step 2** — Push to GitHub:
+```
+git add database/init.sql
+git commit -m "fix: correct notes schema — rename content to body, add tags column"
+git push
+```
+
+**Step 3** — In Colab, run Cell 2 (git pull) so the notebook has the updated file.
+
+**Step 4** — Run Cell 3. It will now drop the old broken table and recreate it correctly. You should see:
+```
+Notes in database: 0
+Database ready

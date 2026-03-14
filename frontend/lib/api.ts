@@ -3,7 +3,11 @@ import type { Note, NoteCreate, NoteUpdate, SearchResponse, SearchResult } from 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, init);
+  const defaultHeaders: HeadersInit = { "ngrok-skip-browser-warning": "true" };
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...init,
+    headers: { ...defaultHeaders, ...init?.headers },
+  });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(text);

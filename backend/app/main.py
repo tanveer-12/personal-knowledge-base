@@ -14,6 +14,13 @@ logger = logging.getLogger(__name__)
 
 settings = get_settings()
 
+_raw_origins = os.environ.get("ALLOWED_ORIGINS", "")
+allowed_origins = (
+    [o.strip() for o in _raw_origins.split(",") if o.strip()]
+    if _raw_origins
+    else ["http://localhost:3000", "http://localhost:3000/"]
+)
+
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
@@ -27,13 +34,6 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-
-_raw_origins = os.environ.get("ALLOWED_ORIGINS", "")
-allowed_origins = (
-    [o.strip() for o in _raw_origins.split(",") if o.strip()]
-    if _raw_origins
-    else ["http://localhost:3000"]
-)
 
 app.add_middleware(
     CORSMiddleware,

@@ -22,6 +22,7 @@ async def lifespan(_app: FastAPI):
     Base.metadata.create_all(bind=engine)
     logger.info("Tables ready")
     logger.info("Startup complete")
+    logger.info(f"CORS allowed origins: {allowed_origins}")
     yield
 
 

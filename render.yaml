@@ -1,0 +1,32 @@
+services:
+  - name: personal-knowledge-base-api
+    type: web
+    runtime: docker
+
+    # Dockerfile.production pre-downloads the sentence-transformers model at
+    # build time so the first request does not trigger a cold download and time out.
+    # The development Dockerfile skips this step to keep local build times short.
+    dockerfilePath: ./backend/Dockerfile.production
+    dockerContext: ./backend
+
+    plan: free
+
+    # 1 instance only: each worker loads ~90 MB of model weights into RAM.
+    # Render's free tier has 512 MB RAM — multiple instances would OOM.
+    numInstances: 1
+
+    healthCheckPath: /health
+
+    envVars:
+      - key: DATABASE_URL
+        # sync: false means Render will NOT generate this value automatically.
+        # You must set it manually in the Render dashboard under Environment.
+        sync: false
+
+      - key: APP_ENV
+        value: production
+
+      - key: ALLOWED_ORIGINS
+        # sync: false — set this in the Render dashboard to your Vercel URL,
+        # e.g. https://your-app.vercel.app,https://your-custom-domain.com
+        sync: false

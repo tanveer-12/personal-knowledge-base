@@ -86,36 +86,3 @@ CREATE TRIGGER set_timestamp
 BEFORE UPDATE ON notes
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
-```
-
----
-
-## What changed and why
-
-| What | Before | After | Why |
-|---|---|---|---|
-| `content` column | `content TEXT NOT NULL` | `body TEXT NOT NULL` | Must match SQLAlchemy model exactly |
-| `tags` column | missing | `tags VARCHAR(500)` | Router tries to insert it, missing column = 500 error |
-| `title` type | `TEXT` | `VARCHAR(255) NOT NULL` | Matches model, enforces not null |
-| `CREATE TABLE IF NOT EXISTS` | present | replaced with `DROP + CREATE` | IF NOT EXISTS silently keeps wrong schema |
-| `created_at` type | `TIMESTAMP WITH TIME ZONE` | `TIMESTAMPTZ` | Shorter alias, same thing |
-
----
-
-## What to do now
-
-**Step 1** — Replace the contents of `database/init.sql` in VS Code with the file above. Save it.
-
-**Step 2** — Push to GitHub:
-```
-git add database/init.sql
-git commit -m "fix: correct notes schema — rename content to body, add tags column"
-git push
-```
-
-**Step 3** — In Colab, run Cell 2 (git pull) so the notebook has the updated file.
-
-**Step 4** — Run Cell 3. It will now drop the old broken table and recreate it correctly. You should see:
-```
-Notes in database: 0
-Database ready

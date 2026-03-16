@@ -66,7 +66,7 @@ export default function NoteEditor({ initialNote, onSuccess, onCancel }: NoteEdi
           onChange={(e) => setBody(e.target.value)}
           required
           rows={5}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm outline-none placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
         />
       </div>
 

@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
@@ -78,15 +79,18 @@ def create_note(payload: NoteCreate, db: Session = Depends(get_db)):
     ])
 
     db.commit()
-    db.refresh(note)
 
+    # Build response from the ingest result — avoids a db.refresh() round-trip.
+    # After commit, SQLAlchemy expires all attributes; accessing them triggers
+    # lazy SELECT calls that can fail on Neon's serverless connection recycle.
     return NoteIngestionResponse(
         id=note.id,
-        auto_title=note.auto_title,
-        summary=note.summary,
+        auto_title=result.auto_title,
+        raw_content=result.raw_content,
+        summary=result.summary,
         tags=result.tags,
         chunk_count=len(result.chunks),
-        created_at=note.created_at,
+        created_at=datetime.now(timezone.utc),
     )
 
 

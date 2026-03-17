@@ -2,8 +2,9 @@ import logging
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.config import get_settings
 from app.database import Base, engine, verify_connection
@@ -47,6 +48,27 @@ app.add_middleware(
 
 app.include_router(notes.router)
 app.include_router(search.router)
+
+
+# Starlette's CORSMiddleware wraps the response `send` callable, but
+# ServerErrorMiddleware (outermost) catches unhandled exceptions and sends the
+# 500 using the *original* send — bypassing the CORS wrapper entirely.
+# Fix: catch all exceptions here and manually attach the CORS header so the
+# browser can actually read the error response.
+@app.exception_handler(Exception)
+async def _unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    logger.error("Unhandled exception: %s", exc, exc_info=True)
+    origin = request.headers.get("origin", "")
+    headers: dict[str, str] = {}
+    if origin in _allowed_origins():
+        headers["Access-Control-Allow-Origin"] = origin
+        headers["Access-Control-Allow-Credentials"] = "true"
+        headers["Vary"] = "Origin"
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error"},
+        headers=headers,
+    )
 
 
 @app.get("/health")

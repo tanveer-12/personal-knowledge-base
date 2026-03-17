@@ -15,6 +15,8 @@ Implement V2 semantic notes UI.
   - floating button, cmd+k shortcut
 - Daily recall section:
   - shows older notes
+- make the UI have dark mode and maybe a 3 theme choices to the user to choose from. 
+  - Be it minimalist, fluid themes, high contrast, vibrant neon or pastel palettes.  
 
 ### Constraints
 - Do not rewrite unrelated components

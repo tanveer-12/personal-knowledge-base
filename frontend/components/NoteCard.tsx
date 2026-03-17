@@ -1,80 +1,211 @@
-import type { Note } from "@/types";
+import type { Note, ChunkSearchResult } from "@/types";
 
-interface NoteCardProps {
-  note: Note;
-  similarityScore?: number;
-  onClick: () => void;
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+function formatDate(iso: string) {
+  const d = new Date(iso);
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - d.getTime()) / 86400000);
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-function similarityBadge(score: number) {
-  const label = `${Math.round(score * 100)}% match`;
-  if (score >= 0.7) {
-    return (
-      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
-        {label}
-      </span>
-    );
-  }
-  if (score >= 0.4) {
-    return (
-      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
-        {label}
-      </span>
-    );
-  }
+function RelevanceBadge({ score }: { score: number }) {
+  const pct = Math.round(score * 100);
+  const [bg, text] =
+    score >= 0.65
+      ? ["var(--match-high-bg)", "var(--match-high-text)"]
+      : score >= 0.4
+        ? ["var(--match-mid-bg)", "var(--match-mid-text)"]
+        : ["var(--match-low-bg)", "var(--match-low-text)"];
   return (
-    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
-      {label}
+    <span
+      className="rounded-full px-2 py-0.5 text-xs font-semibold shrink-0"
+      style={{ backgroundColor: bg, color: text }}
+    >
+      {pct}%
     </span>
   );
 }
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+// ── NoteCard ───────────────────────────────────────────────────────────────
+
+interface NoteCardProps {
+  note: Note;
+  similarityScore?: number;
+  compact?: boolean;
+  onClick: () => void;
 }
 
-export default function NoteCard({ note, similarityScore, onClick }: NoteCardProps) {
-  const tags = note.tags
-    ? note.tags.split(",").map((t) => t.trim()).filter(Boolean)
-    : [];
+export default function NoteCard({
+  note,
+  similarityScore,
+  compact = false,
+  onClick,
+}: NoteCardProps) {
+  const displayDate = note.updated_at
+    ? formatDate(note.updated_at)
+    : formatDate(note.created_at);
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className="w-full rounded-xl border border-gray-200 bg-white p-4 text-left shadow-sm transition hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-200"
+      className="w-full text-left group transition-all"
+      style={{
+        backgroundColor: "var(--surface)",
+        border: "1px solid var(--border)",
+        borderRadius: "var(--radius)",
+        padding: compact ? "0.625rem 0.75rem" : "1rem",
+        boxShadow: "var(--shadow-sm)",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "var(--border-hover)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-md)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
+      }}
     >
       {/* Title row */}
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-sm font-semibold text-gray-900 leading-snug">
-          {note.title}
+        <h3
+          className={`font-semibold leading-snug ${compact ? "text-xs" : "text-sm"} line-clamp-1`}
+          style={{ color: "var(--text)" }}
+        >
+          {note.auto_title}
         </h3>
-        {similarityScore !== undefined && similarityBadge(similarityScore)}
+        {similarityScore !== undefined && (
+          <RelevanceBadge score={similarityScore} />
+        )}
       </div>
 
-      {/* Body */}
-      <p className="mt-1.5 text-sm text-gray-600 line-clamp-3">{note.body}</p>
+      {/* Summary */}
+      {!compact && note.summary && (
+        <p
+          className="mt-1 text-xs leading-relaxed line-clamp-2"
+          style={{ color: "var(--text-secondary)" }}
+        >
+          {note.summary}
+        </p>
+      )}
 
       {/* Tags */}
-      {tags.length > 0 && (
+      {note.tags.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
-          {tags.map((tag) => (
+          {note.tags.slice(0, compact ? 2 : 4).map((tag) => (
             <span
               key={tag}
-              className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700"
+              className="rounded-full px-1.5 py-0.5 text-xs"
+              style={{
+                backgroundColor: "var(--tag-bg)",
+                color: "var(--tag-text)",
+                border: "1px solid var(--tag-border)",
+              }}
+            >
+              {tag}
+            </span>
+          ))}
+          {note.tags.length > (compact ? 2 : 4) && (
+            <span
+              className="rounded-full px-1.5 py-0.5 text-xs"
+              style={{ color: "var(--text-muted)" }}
+            >
+              +{note.tags.length - (compact ? 2 : 4)}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Footer: date */}
+      <p
+        className={`mt-2 ${compact ? "text-xs" : "text-xs"}`}
+        style={{ color: "var(--text-muted)" }}
+      >
+        {displayDate}
+      </p>
+    </button>
+  );
+}
+
+// ── SearchResultCard — wraps ChunkSearchResult with snippet ───────────────
+
+interface SearchResultCardProps {
+  result: ChunkSearchResult;
+  onClick: () => void;
+}
+
+export function SearchResultCard({ result, onClick }: SearchResultCardProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full text-left transition-all"
+      style={{
+        backgroundColor: "var(--surface)",
+        border: "1px solid var(--border)",
+        borderRadius: "var(--radius)",
+        padding: "1rem",
+        boxShadow: "var(--shadow-sm)",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "var(--border-hover)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-md)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
+      }}
+    >
+      {/* Title + score */}
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="text-sm font-semibold line-clamp-1" style={{ color: "var(--text)" }}>
+          {result.auto_title}
+        </h3>
+        <RelevanceBadge score={result.similarity_score} />
+      </div>
+
+      {/* Snippet */}
+      {result.snippet && (
+        <p
+          className="mt-1 text-xs leading-relaxed line-clamp-2 font-mono"
+          style={{ color: "var(--text-secondary)" }}
+        >
+          &ldquo;{result.snippet}&rdquo;
+        </p>
+      )}
+
+      {/* Summary */}
+      {result.summary && (
+        <p
+          className="mt-1 text-xs leading-relaxed line-clamp-1"
+          style={{ color: "var(--text-muted)" }}
+        >
+          {result.summary}
+        </p>
+      )}
+
+      {/* Tags */}
+      {result.tags.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {result.tags.slice(0, 4).map((tag) => (
+            <span
+              key={tag}
+              className="rounded-full px-1.5 py-0.5 text-xs"
+              style={{
+                backgroundColor: "var(--tag-bg)",
+                color: "var(--tag-text)",
+                border: "1px solid var(--tag-border)",
+              }}
             >
               {tag}
             </span>
           ))}
         </div>
       )}
-
-      {/* Date */}
-      <p className="mt-3 text-xs text-gray-400">{formatDate(note.created_at)}</p>
     </button>
   );
 }

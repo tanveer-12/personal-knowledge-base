@@ -11,3 +11,21 @@ services:
       - ./backend/.env
     command: python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     restart: unless-stopped
+    depends_on:
+      - db
+  
+  db:
+    image: postgres:15
+    container_name: pkb-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: neondb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  pgdata:

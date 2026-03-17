@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
@@ -19,9 +19,8 @@ class Note(Base):
     )
     updated_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
-        onupdate=lambda: datetime.now(timezone.utc),
         nullable=True,
-    )
+    )  # maintained by set_timestamp DB trigger — no ORM onupdate needed
 
     chunks: Mapped[list["NoteChunk"]] = relationship(
         "NoteChunk", back_populates="note", cascade="all, delete-orphan"

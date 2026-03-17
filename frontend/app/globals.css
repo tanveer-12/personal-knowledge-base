@@ -1,26 +1,405 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ============================================================
+   THEME SYSTEM — 5 themes via [data-theme] on <html>
+   All theme-sensitive components reference these CSS variables.
+   ============================================================ */
+
+/* ── Minimalist: clean white space, charcoal accents ── */
+:root,
+[data-theme="minimalist"] {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --surface-hover: #f9fafb;
+  --border: #e5e7eb;
+  --border-hover: #9ca3af;
+  --text: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #9ca3af;
+  --accent: #1f2937;
+  --accent-hover: #374151;
+  --accent-fg: #ffffff;
+  --tag-bg: #f3f4f6;
+  --tag-text: #374151;
+  --tag-border: transparent;
+  --sidebar-bg: #f9fafb;
+  --sidebar-border: #e5e7eb;
+  --header-bg: rgba(255, 255, 255, 0.85);
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --input-focus-ring: #6b7280;
+  --fab-bg: #1f2937;
+  --fab-fg: #ffffff;
+  --fab-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  --match-high-bg: #d1fae5;
+  --match-high-text: #065f46;
+  --match-mid-bg: #fef3c7;
+  --match-mid-text: #92400e;
+  --match-low-bg: #f3f4f6;
+  --match-low-text: #374151;
+  --recall-bg: #fffbeb;
+  --recall-border: #fde68a;
+  --recall-heading: #92400e;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+  --modal-overlay: rgba(0, 0, 0, 0.4);
+  --radius: 0.75rem;
+  --radius-sm: 0.375rem;
+  --radius-lg: 1rem;
+  --scrollbar-thumb: #d1d5db;
+  --scrollbar-track: #f3f4f6;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ── Fluid: indigo/violet gradient feel ── */
+[data-theme="fluid"] {
+  --bg: #f5f3ff;
+  --surface: #ffffff;
+  --surface-hover: #f5f3ff;
+  --border: #ddd6fe;
+  --border-hover: #a78bfa;
+  --text: #1e1b4b;
+  --text-secondary: #4c1d95;
+  --text-muted: #7c3aed;
+  --accent: #7c3aed;
+  --accent-hover: #6d28d9;
+  --accent-fg: #ffffff;
+  --tag-bg: #ede9fe;
+  --tag-text: #5b21b6;
+  --tag-border: #c4b5fd;
+  --sidebar-bg: #ede9fe;
+  --sidebar-border: #c4b5fd;
+  --header-bg: rgba(245, 243, 255, 0.9);
+  --input-bg: #ffffff;
+  --input-border: #c4b5fd;
+  --input-focus-ring: #7c3aed;
+  --fab-bg: #7c3aed;
+  --fab-fg: #ffffff;
+  --fab-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
+  --match-high-bg: #d1fae5;
+  --match-high-text: #065f46;
+  --match-mid-bg: #fef3c7;
+  --match-mid-text: #92400e;
+  --match-low-bg: #ede9fe;
+  --match-low-text: #5b21b6;
+  --recall-bg: #fdf4ff;
+  --recall-border: #e9d5ff;
+  --recall-heading: #7c3aed;
+  --shadow-sm: 0 1px 3px rgba(124, 58, 237, 0.08);
+  --shadow-md: 0 4px 12px rgba(124, 58, 237, 0.12);
+  --shadow-lg: 0 10px 30px rgba(124, 58, 237, 0.18);
+  --modal-overlay: rgba(30, 27, 75, 0.5);
+  --radius: 1rem;
+  --radius-sm: 0.5rem;
+  --radius-lg: 1.25rem;
+  --scrollbar-thumb: #c4b5fd;
+  --scrollbar-track: #ede9fe;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── High Contrast: pure black & white ── */
+[data-theme="high-contrast"] {
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --surface-hover: #1a1a1a;
+  --border: #ffffff;
+  --border-hover: #cccccc;
+  --text: #ffffff;
+  --text-secondary: #d1d5db;
+  --text-muted: #9ca3af;
+  --accent: #ffffff;
+  --accent-hover: #e5e7eb;
+  --accent-fg: #000000;
+  --tag-bg: #1a1a1a;
+  --tag-text: #ffffff;
+  --tag-border: #ffffff;
+  --sidebar-bg: #050505;
+  --sidebar-border: #ffffff;
+  --header-bg: rgba(0, 0, 0, 0.97);
+  --input-bg: #000000;
+  --input-border: #ffffff;
+  --input-focus-ring: #ffffff;
+  --fab-bg: #ffffff;
+  --fab-fg: #000000;
+  --fab-shadow: 0 0 0 2px #ffffff;
+  --match-high-bg: #00ff00;
+  --match-high-text: #000000;
+  --match-mid-bg: #ffff00;
+  --match-mid-text: #000000;
+  --match-low-bg: #333333;
+  --match-low-text: #ffffff;
+  --recall-bg: #111111;
+  --recall-border: #ffffff;
+  --recall-heading: #ffffff;
+  --shadow-sm: 0 0 0 1px #ffffff;
+  --shadow-md: 0 0 0 2px #ffffff;
+  --shadow-lg: 0 0 0 2px #ffffff;
+  --modal-overlay: rgba(0, 0, 0, 0.8);
+  --radius: 0px;
+  --radius-sm: 0px;
+  --radius-lg: 0px;
+  --scrollbar-thumb: #ffffff;
+  --scrollbar-track: #111111;
+}
+
+/* ── Neon: synthwave dark ── */
+[data-theme="neon"] {
+  --bg: #0d0d1a;
+  --surface: #1a1a2e;
+  --surface-hover: #16213e;
+  --border: #0f3460;
+  --border-hover: #e94560;
+  --text: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent: #00f5d4;
+  --accent-hover: #00d4b4;
+  --accent-fg: #0d0d1a;
+  --tag-bg: #0f3460;
+  --tag-text: #00f5d4;
+  --tag-border: rgba(0, 245, 212, 0.3);
+  --sidebar-bg: #12122a;
+  --sidebar-border: #0f3460;
+  --header-bg: rgba(13, 13, 26, 0.95);
+  --input-bg: #1a1a2e;
+  --input-border: #0f3460;
+  --input-focus-ring: #00f5d4;
+  --fab-bg: #00f5d4;
+  --fab-fg: #0d0d1a;
+  --fab-shadow: 0 0 20px rgba(0, 245, 212, 0.5);
+  --match-high-bg: rgba(0, 245, 212, 0.15);
+  --match-high-text: #00f5d4;
+  --match-mid-bg: rgba(233, 69, 96, 0.15);
+  --match-mid-text: #e94560;
+  --match-low-bg: rgba(15, 52, 96, 0.5);
+  --match-low-text: #94a3b8;
+  --recall-bg: #1a0e2e;
+  --recall-border: #6b21a8;
+  --recall-heading: #c084fc;
+  --shadow-sm: 0 0 8px rgba(0, 245, 212, 0.08);
+  --shadow-md: 0 0 20px rgba(0, 245, 212, 0.12);
+  --shadow-lg: 0 0 40px rgba(0, 245, 212, 0.16);
+  --modal-overlay: rgba(0, 0, 0, 0.7);
+  --radius: 0.5rem;
+  --radius-sm: 0.25rem;
+  --radius-lg: 0.75rem;
+  --scrollbar-thumb: #0f3460;
+  --scrollbar-track: #12122a;
+}
+
+/* ── Space: deep cosmos with neon aurora ── */
+[data-theme="space"] {
+  --bg: transparent;
+  --surface: rgba(8, 8, 28, 0.82);
+  --surface-hover: rgba(14, 14, 42, 0.9);
+  --border: rgba(139, 92, 246, 0.22);
+  --border-hover: rgba(0, 245, 212, 0.55);
+  --text: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent: #a78bfa;
+  --accent-hover: #8b5cf6;
+  --accent-fg: #0d0d1a;
+  --tag-bg: rgba(139, 92, 246, 0.14);
+  --tag-text: #c4b5fd;
+  --tag-border: rgba(139, 92, 246, 0.3);
+  --sidebar-bg: rgba(4, 4, 18, 0.96);
+  --sidebar-border: rgba(139, 92, 246, 0.18);
+  --header-bg: rgba(3, 0, 20, 0.96);
+  --input-bg: rgba(8, 8, 28, 0.9);
+  --input-border: rgba(139, 92, 246, 0.3);
+  --input-focus-ring: #a78bfa;
+  --fab-bg: #a78bfa;
+  --fab-fg: #0d0d1a;
+  --fab-shadow: 0 0 24px rgba(167, 139, 250, 0.55);
+  --match-high-bg: rgba(0, 245, 212, 0.14);
+  --match-high-text: #00f5d4;
+  --match-mid-bg: rgba(167, 139, 250, 0.14);
+  --match-mid-text: #a78bfa;
+  --match-low-bg: rgba(100, 116, 139, 0.14);
+  --match-low-text: #94a3b8;
+  --recall-bg: rgba(139, 92, 246, 0.08);
+  --recall-border: rgba(139, 92, 246, 0.28);
+  --recall-heading: #c4b5fd;
+  --shadow-sm: 0 0 12px rgba(139, 92, 246, 0.1);
+  --shadow-md: 0 0 24px rgba(139, 92, 246, 0.18);
+  --shadow-lg: 0 0 48px rgba(139, 92, 246, 0.28);
+  --modal-overlay: rgba(0, 0, 12, 0.78);
+  --radius: 0.75rem;
+  --radius-sm: 0.375rem;
+  --radius-lg: 1rem;
+  --scrollbar-thumb: rgba(139, 92, 246, 0.35);
+  --scrollbar-track: rgba(8, 8, 28, 0.5);
+}
+
+/* Space: html element base color + animated aurora */
+[data-theme="space"] {
+  background-color: #030014;
+}
+[data-theme="space"] body {
+  background-color: transparent;
+}
+
+/* Aurora blobs */
+[data-theme="space"] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 55% at 15% 45%, rgba(139, 92, 246, 0.3) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 65% at 82% 22%, rgba(0, 190, 255, 0.2) 0%, transparent 60%),
+    radial-gradient(ellipse 45% 45% at 62% 82%, rgba(236, 72, 153, 0.15) 0%, transparent 55%);
+  animation: spaceAurora 13s ease-in-out infinite alternate;
+}
+
+/* Neon spikes rotating slowly */
+[data-theme="space"] body::after {
+  content: '';
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 280%;
+  height: 280%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  pointer-events: none;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 28deg,
+    rgba(139, 92, 246, 0.035) 29deg,
+    rgba(139, 92, 246, 0.07) 30deg,
+    rgba(139, 92, 246, 0.035) 31deg,
+    transparent 32deg,
+    transparent 88deg,
+    rgba(0, 245, 212, 0.025) 89deg,
+    rgba(0, 245, 212, 0.055) 90deg,
+    rgba(0, 245, 212, 0.025) 91deg,
+    transparent 92deg,
+    transparent 148deg,
+    rgba(236, 72, 153, 0.025) 149deg,
+    rgba(236, 72, 153, 0.05) 150deg,
+    rgba(236, 72, 153, 0.025) 151deg,
+    transparent 152deg,
+    transparent 208deg,
+    rgba(96, 165, 250, 0.025) 209deg,
+    rgba(96, 165, 250, 0.05) 210deg,
+    rgba(96, 165, 250, 0.025) 211deg,
+    transparent 212deg,
+    transparent 360deg
+  );
+  animation: spaceSpikes 30s linear infinite;
+}
+
+@keyframes spaceAurora {
+  0%   { transform: scale(1)    translateX(0)    translateY(0);    opacity: 0.65; }
+  33%  { transform: scale(1.06) translateX(3%)   translateY(-2%);  opacity: 1;    }
+  66%  { transform: scale(0.96) translateX(-2%)  translateY(3%);   opacity: 0.75; }
+  100% { transform: scale(1.03) translateX(1%)   translateY(-1%);  opacity: 0.9;  }
+}
+
+@keyframes spaceSpikes {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Tag bubble float animation for Tag Universe modal */
+@keyframes tagFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-5px); }
+}
+.tag-bubble {
+  animation: tagFloat 3s ease-in-out infinite;
+}
+
+/* ── Pastel: soft rose & lavender ── */
+[data-theme="pastel"] {
+  --bg: #fdf2f8;
+  --surface: #ffffff;
+  --surface-hover: #fdf2f8;
+  --border: #fbcfe8;
+  --border-hover: #f472b6;
+  --text: #831843;
+  --text-secondary: #9d174d;
+  --text-muted: #be185d;
+  --accent: #ec4899;
+  --accent-hover: #db2777;
+  --accent-fg: #ffffff;
+  --tag-bg: #fce7f3;
+  --tag-text: #9d174d;
+  --tag-border: #fbcfe8;
+  --sidebar-bg: #fce7f3;
+  --sidebar-border: #fbcfe8;
+  --header-bg: rgba(253, 242, 248, 0.9);
+  --input-bg: #ffffff;
+  --input-border: #fbcfe8;
+  --input-focus-ring: #ec4899;
+  --fab-bg: #ec4899;
+  --fab-fg: #ffffff;
+  --fab-shadow: 0 4px 20px rgba(236, 72, 153, 0.4);
+  --match-high-bg: #d1fae5;
+  --match-high-text: #065f46;
+  --match-mid-bg: #fef3c7;
+  --match-mid-text: #92400e;
+  --match-low-bg: #fce7f3;
+  --match-low-text: #9d174d;
+  --recall-bg: #fdf4ff;
+  --recall-border: #e9d5ff;
+  --recall-heading: #7e22ce;
+  --shadow-sm: 0 1px 3px rgba(236, 72, 153, 0.08);
+  --shadow-md: 0 4px 12px rgba(236, 72, 153, 0.12);
+  --shadow-lg: 0 10px 30px rgba(236, 72, 153, 0.18);
+  --modal-overlay: rgba(131, 24, 67, 0.3);
+  --radius: 1.25rem;
+  --radius-sm: 0.625rem;
+  --radius-lg: 1.5rem;
+  --scrollbar-thumb: #fbcfe8;
+  --scrollbar-track: #fdf2f8;
+}
+
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+/* Focus ring reset — components apply their own */
+*:focus {
+  outline: none;
+}
+
+/* Smooth transitions for surface/border changes */
+.t-surface {
+  background-color: var(--surface);
+  border-color: var(--border);
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }

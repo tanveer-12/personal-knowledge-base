@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 import torch
 from sentence_transformers import SentenceTransformer
@@ -23,14 +22,16 @@ class EmbeddingService:
         logger.info("Loading embedding model %s on %s", MODEL_NAME, device)
         self._model = SentenceTransformer(MODEL_NAME, device=device)
 
-    def embed(self, text: str) -> List[float]:
+    def _ensure_loaded(self) -> None:
         if self._model is None:
             self._load_model()
+
+    def embed(self, text: str) -> list[float]:
+        self._ensure_loaded()
         return self._model.encode(text, normalize_embeddings=True).tolist()
 
-    def embed_batch(self, texts: List[str], batch_size: int = 32) -> List[List[float]]:
-        if self._model is None:
-            self._load_model()
+    def embed_batch(self, texts: list[str], batch_size: int = 32) -> list[list[float]]:
+        self._ensure_loaded()
         return self._model.encode(
             texts, batch_size=batch_size, normalize_embeddings=True
         ).tolist()

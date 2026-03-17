@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -22,23 +21,29 @@ class NoteTitleUpdate(BaseModel):
 # Outbound — note CRUD
 # ---------------------------------------------------------------------------
 
-class NoteResponse(BaseModel):
+class NoteContentUpdate(BaseModel):
+    """Update the raw body — triggers full re-ingestion of summary/tags/chunks."""
+    body: str = Field(min_length=1)
+
+
+class _NoteBase(BaseModel):
+    """Shared fields for all note response schemas."""
     id: int
     auto_title: str
-    summary: Optional[str]
-    tags: List[str]
+    raw_content: str
+    summary: str | None
+    tags: list[str]
+
+
+class NoteResponse(_NoteBase):
     created_at: datetime
-    updated_at: Optional[datetime]
+    updated_at: datetime | None
 
     model_config = {"from_attributes": True}
 
 
-class NoteIngestionResponse(BaseModel):
+class NoteIngestionResponse(_NoteBase):
     """Returned immediately after POST /notes — includes ingestion metadata."""
-    id: int
-    auto_title: str
-    summary: Optional[str]
-    tags: List[str]
     chunk_count: int
     created_at: datetime
 
@@ -51,13 +56,13 @@ class ChunkSearchResult(BaseModel):
     """One result row from chunk-level semantic search."""
     note_id: int
     auto_title: str
-    summary: Optional[str]
+    summary: str | None
     snippet: str        # the matching chunk text
     similarity_score: float
-    tags: List[str]
+    tags: list[str]
 
 
 class SearchResponse(BaseModel):
     query: str
-    results: List[ChunkSearchResult]
+    results: list[ChunkSearchResult]
     total: int

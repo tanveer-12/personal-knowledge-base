@@ -4,13 +4,25 @@
 
 ---
 
+## 🎬 See It in Action
+
+> **Quick Preview**
+
+![Demo](docs/base-test.gif)
+
+---
+
+## 📸 Screenshots
+
+### The Minimalist Theme
 
 ![Minimalist Theme](docs/base-1-mini.png)
 
+---
+
+### Neon Theme
+
 ![Neon Theme](docs/base-1-neon.png)
-
-
-![Demo](docs/base-test.gif)
 
 ---
 
